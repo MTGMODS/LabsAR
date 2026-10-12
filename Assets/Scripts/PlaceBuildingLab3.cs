@@ -273,16 +273,10 @@ public class PlaceBuildingLab3 : MonoBehaviour
         else if (twoFingerMode == TwoFingerMode.Rotate)
         {
             float averageDeltaX = (delta0.x + delta1.x) * 0.5f;
-            float averageDeltaY = (delta0.y + delta1.y) * 0.5f;
 
             placedBuilding.transform.Rotate(
                 Vector3.up,
                 averageDeltaX * 0.15f,
-                Space.World);
-
-            placedBuilding.transform.Rotate(
-                Vector3.right,
-                -averageDeltaY * 0.15f,
                 Space.World);
         }
 
