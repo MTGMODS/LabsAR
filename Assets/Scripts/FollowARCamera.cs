@@ -18,24 +18,14 @@ public class FollowARCamera : MonoBehaviour
         if (arCamera == null)
             return;
 
-        Vector3 targetPosition = arCamera.position
-                               + arCamera.forward * offset.z
-                               + arCamera.right * offset.x
-                               + arCamera.up * offset.y;
+        Vector3 targetPosition = arCamera.position + arCamera.forward * offset.z + arCamera.right * offset.x + arCamera.up * offset.y;
 
         float followAmount = Mathf.Clamp01(smoothSpeed * Time.deltaTime);
-        transform.position = Vector3.Lerp(
-            transform.position,
-            targetPosition,
-            followAmount);
 
-        Quaternion targetRotation = Quaternion.LookRotation(
-            -arCamera.forward,
-            arCamera.up) * Quaternion.Euler(rotationOffsetEuler);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, followAmount);
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            followAmount);
+        Quaternion targetRotation = Quaternion.LookRotation(-arCamera.forward, arCamera.up) * Quaternion.Euler(rotationOffsetEuler);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, followAmount);
     }
 }
