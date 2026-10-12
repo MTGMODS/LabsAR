@@ -202,6 +202,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1447303033}
   m_SourcePrefab: {fileID: 100100000, guid: 48cb3fb68c91eb94999fd99957eb0cae, type: 3}
+--- !u!4 &331264286 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2512387469002778308, guid: 48cb3fb68c91eb94999fd99957eb0cae, type: 3}
+  m_PrefabInstance: {fileID: 331264285}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &402997514
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,8 +975,32 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1457307595}
   m_SourcePrefab: {fileID: 100100000, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
+--- !u!1 &1457307594 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
+  m_PrefabInstance: {fileID: 1457307593}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1457307595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457307594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ad7f5c8d9d1d9a4a95da566b0f9d141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FollowARCamera
+  arCamera: {fileID: 331264286}
+  offset: {x: 0, y: -0.1, z: 1.2}
+  smoothSpeed: 12
+  rotationOffsetEuler: {x: 0, y: 0, z: 0}
 --- !u!1 &1551466233
 GameObject:
   m_ObjectHideFlags: 0
