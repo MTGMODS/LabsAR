@@ -918,6 +918,11 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!20 &1447303039 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2512387469002778331, guid: 48cb3fb68c91eb94999fd99957eb0cae, type: 3}
+  m_PrefabInstance: {fileID: 331264285}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1551466233
 GameObject:
   m_ObjectHideFlags: 0
@@ -1085,8 +1090,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlaceBuildingLab3
   buildingPrefab: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
-  alternateMaterial: {fileID: 2100000, guid: a5053993f02e54a4a95d84b6bc8676ee, type: 2}
+  arCamera: {fileID: 1447303039}
+  raycastManager: {fileID: 2059183803}
+  appearanceMaterials:
+  - {fileID: 2100000, guid: 62e25ef75a2216f418d06453c9ad15cb, type: 2}
+  - {fileID: 2100000, guid: a5053993f02e54a4a95d84b6bc8676ee, type: 2}
+  - {fileID: 2100000, guid: b65d358e810cbb94ca5d6c2a17fb0cf2, type: 2}
   rotationAnimationSpeed: 45
+--- !u!114 &2059183803 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2512387470528047718, guid: 48cb3fb68c91eb94999fd99957eb0cae, type: 3}
+  m_PrefabInstance: {fileID: 331264285}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059183795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa17d122634046b4a8e23048891fafc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

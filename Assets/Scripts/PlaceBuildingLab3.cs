@@ -10,21 +10,20 @@ using UnityEngine.XR.ARSubsystems;
 public class PlaceBuildingLab3 : MonoBehaviour
 {
     [SerializeField] private GameObject buildingPrefab;
-    [SerializeField] private Material alternateMaterial;
+    [SerializeField] private Camera arCamera;
+    [SerializeField] private ARRaycastManager raycastManager;
+    [SerializeField] private Material[] appearanceMaterials;
     [SerializeField] private float rotationAnimationSpeed = 45f;
 
-    private ARRaycastManager raycastManager;
-    private Camera arCamera;
     private GameObject placedBuilding;
     private Renderer buildingRenderer;
-    private Material originalMaterial;
+    private int currentMaterialIndex;
 
     private bool isDragging;
     private bool touchStartedOnUI;
     private bool twoFingerGestureActive;
     private bool touchStartedOnBuilding;
     private bool touchMoved;
-    private bool usingAlternateMaterial;
     private bool animationActive;
 
     private Vector2 touchStartPosition;
@@ -37,13 +36,26 @@ public class PlaceBuildingLab3 : MonoBehaviour
     private Vector2 previousFinger0;
     private Vector2 previousFinger1;
 
+    private TwoFingerMode twoFingerMode = TwoFingerMode.Undetermined;
+
     private readonly List<ARRaycastHit> planeHits = new();
     private readonly List<RaycastResult> uiHits = new();
 
+    private enum TwoFingerMode
+    {
+        Undetermined,
+        Pinch,
+        Rotate,
+        Ignore
+    }
+
     private void Awake()
     {
-        raycastManager = GetComponent<ARRaycastManager>();
-        arCamera = Camera.main;
+        if (raycastManager == null)
+            raycastManager = GetComponent<ARRaycastManager>();
+
+        if (arCamera == null)
+            arCamera = Camera.main;
     }
 
     private void Update()
@@ -101,6 +113,7 @@ public class PlaceBuildingLab3 : MonoBehaviour
         if (twoFingerGestureActive)
         {
             twoFingerGestureActive = false;
+            twoFingerMode = TwoFingerMode.Undetermined;
             isDragging = false;
             touchStartedOnBuilding = false;
             return;
@@ -117,6 +130,7 @@ public class PlaceBuildingLab3 : MonoBehaviour
             return;
         }
 
+        // Новий Input System: wasPressedThisFrame відповідає TouchPhase.Began.
         if (touch.press.wasPressedThisFrame)
         {
             if (IsTouchOverUI(screenPosition))
@@ -139,6 +153,7 @@ public class PlaceBuildingLab3 : MonoBehaviour
             }
         }
 
+        // isPressed та зміна позиції відповідають переміщенню пальця.
         if (touch.press.isPressed && isDragging)
         {
             if (Vector2.Distance(touchStartPosition, screenPosition) > 30f)
@@ -148,6 +163,7 @@ public class PlaceBuildingLab3 : MonoBehaviour
                 DragBuilding(screenPosition);
         }
 
+        // wasReleasedThisFrame відповідає TouchPhase.Ended.
         if (touch.press.wasReleasedThisFrame)
         {
             if (touchStartedOnBuilding &&
@@ -190,20 +206,25 @@ public class PlaceBuildingLab3 : MonoBehaviour
 
     private void ToggleMaterial()
     {
-        if (alternateMaterial == null || buildingRenderer == null || originalMaterial == null)
+        if (buildingRenderer == null ||
+            appearanceMaterials == null ||
+            appearanceMaterials.Length < 2)
         {
-            Debug.LogWarning("Assign the Alternate Material in the Inspector.");
+            Debug.LogWarning(
+                "Assign at least two materials in Appearance Materials.");
             return;
         }
 
-        usingAlternateMaterial = !usingAlternateMaterial;
-        buildingRenderer.material =
-            usingAlternateMaterial ? alternateMaterial : originalMaterial;
+        currentMaterialIndex =
+            (currentMaterialIndex + 1) % appearanceMaterials.Length;
+
+        buildingRenderer.material = appearanceMaterials[currentMaterialIndex];
     }
 
     private void BeginTwoFingerGesture(Vector2 finger0, Vector2 finger1)
     {
         twoFingerGestureActive = true;
+        twoFingerMode = TwoFingerMode.Undetermined;
         isDragging = false;
         touchStartedOnBuilding = false;
 
@@ -215,26 +236,53 @@ public class PlaceBuildingLab3 : MonoBehaviour
 
     private void ContinueTwoFingerGesture(Vector2 finger0, Vector2 finger1)
     {
-        float currentDistance = Vector2.Distance(finger0, finger1);
-
-        if (startPinchDistance > 0.01f)
-        {
-            float scaleFactor = currentDistance / startPinchDistance;
-            float newScale = Mathf.Clamp(startScale.x * scaleFactor, 0.025f, 0.15f);
-            placedBuilding.transform.localScale = Vector3.one * newScale;
-        }
-
         Vector2 delta0 = finger0 - previousFinger0;
         Vector2 delta1 = finger1 - previousFinger1;
 
-        if (delta0.sqrMagnitude > 1f &&
-            delta1.sqrMagnitude > 1f &&
-            Vector2.Dot(delta0.normalized, delta1.normalized) > 0.7f)
+        if (twoFingerMode == TwoFingerMode.Undetermined &&
+            delta0.sqrMagnitude > 1f &&
+            delta1.sqrMagnitude > 1f)
         {
-            float averageMovement = (delta0.x + delta1.x) * 0.5f;
+            // Dot близький до 1: пальці рухаються в одному напрямку — обертання.
+            float directionDot =
+                Vector2.Dot(delta0.normalized, delta1.normalized);
+
+            if (directionDot > 0.9f)
+                twoFingerMode = TwoFingerMode.Rotate;
+            // Від’ємний Dot: пальці рухаються назустріч/у різні боки — pinch.
+            else if (directionDot < -0.5f)
+                twoFingerMode = TwoFingerMode.Pinch;
+            else
+                twoFingerMode = TwoFingerMode.Ignore;
+        }
+
+        if (twoFingerMode == TwoFingerMode.Pinch)
+        {
+            float currentDistance = Vector2.Distance(finger0, finger1);
+
+            if (startPinchDistance > 0.01f && startScale.x > 0.001f)
+            {
+                float scaleFactor = currentDistance / startPinchDistance;
+                float newScaleX =
+                    Mathf.Clamp(startScale.x * scaleFactor, 0.025f, 0.15f);
+
+                placedBuilding.transform.localScale =
+                    startScale * (newScaleX / startScale.x);
+            }
+        }
+        else if (twoFingerMode == TwoFingerMode.Rotate)
+        {
+            float averageDeltaX = (delta0.x + delta1.x) * 0.5f;
+            float averageDeltaY = (delta0.y + delta1.y) * 0.5f;
+
             placedBuilding.transform.Rotate(
                 Vector3.up,
-                averageMovement * 0.15f,
+                averageDeltaX * 0.15f,
+                Space.World);
+
+            placedBuilding.transform.Rotate(
+                Vector3.right,
+                -averageDeltaY * 0.15f,
                 Space.World);
         }
 
@@ -252,11 +300,18 @@ public class PlaceBuildingLab3 : MonoBehaviour
 
         if (TryGetPlanePose(screenPosition, out Pose pose))
         {
-            placedBuilding = Instantiate(buildingPrefab, pose.position, pose.rotation);
-            buildingRenderer = placedBuilding.GetComponentInChildren<Renderer>();
+            placedBuilding =
+                Instantiate(buildingPrefab, pose.position, pose.rotation);
 
-            if (buildingRenderer != null)
-                originalMaterial = buildingRenderer.material;
+            buildingRenderer = placedBuilding.GetComponentInChildren<Renderer>();
+            currentMaterialIndex = 0;
+
+            if (buildingRenderer != null &&
+                appearanceMaterials != null &&
+                appearanceMaterials.Length > 0)
+            {
+                buildingRenderer.material = appearanceMaterials[0];
+            }
         }
     }
 
@@ -268,10 +323,11 @@ public class PlaceBuildingLab3 : MonoBehaviour
 
     private bool TryGetPlanePose(Vector2 screenPosition, out Pose pose)
     {
-        if (raycastManager.Raycast(
+        if (raycastManager != null &&
+            raycastManager.Raycast(
                 screenPosition,
                 planeHits,
-                TrackableType.PlaneWithinPolygon))
+                TrackableType.Planes))
         {
             pose = planeHits[0].pose;
             return true;
