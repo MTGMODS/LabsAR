@@ -670,6 +670,7 @@ GameObject:
   - component: {fileID: 1075000276}
   - component: {fileID: 1075000275}
   - component: {fileID: 1075000277}
+  - component: {fileID: 1075000278}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -786,6 +787,21 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!114 &1075000278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075000274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 340513bef8fa4388aa6579efa848051e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ARLightEstimationController
+  arCameraManager: {fileID: 0}
+  directionalLight: {fileID: 0}
+  lightValuesText: {fileID: 0}
 --- !u!1 &1323550131
 GameObject:
   m_ObjectHideFlags: 0
