@@ -925,7 +925,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
       propertyPath: m_Name
-      value: ARBuildingLab3
+      value: ARBuildingLab4
       objectReference: {fileID: 0}
     - target: {fileID: 6610741289522793876, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
       propertyPath: m_LocalPosition.x
