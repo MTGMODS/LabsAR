@@ -10,13 +10,27 @@ using UnityEngine.XR.ARSubsystems;
 public class PlaceBuildingLab3 : MonoBehaviour
 {
     [SerializeField] private GameObject buildingPrefab;
+    [SerializeField] private Material alternateMaterial;
+    [SerializeField] private float rotationAnimationSpeed = 45f;
 
     private ARRaycastManager raycastManager;
     private Camera arCamera;
     private GameObject placedBuilding;
+    private Renderer buildingRenderer;
+    private Material originalMaterial;
+
     private bool isDragging;
     private bool touchStartedOnUI;
     private bool twoFingerGestureActive;
+    private bool touchStartedOnBuilding;
+    private bool touchMoved;
+    private bool usingAlternateMaterial;
+    private bool animationActive;
+
+    private Vector2 touchStartPosition;
+    private float touchStartTime;
+    private int tapCount;
+    private float lastTapTime;
 
     private float startPinchDistance;
     private Vector3 startScale;
@@ -34,6 +48,16 @@ public class PlaceBuildingLab3 : MonoBehaviour
 
     private void Update()
     {
+        ResolveTapSequence();
+
+        if (animationActive && placedBuilding != null)
+        {
+            placedBuilding.transform.Rotate(
+                Vector3.up,
+                rotationAnimationSpeed * Time.deltaTime,
+                Space.World);
+        }
+
         if (Touchscreen.current == null)
             return;
 
@@ -45,20 +69,18 @@ public class PlaceBuildingLab3 : MonoBehaviour
         for (int i = 0; i < touches.Count; i++)
         {
             var currentTouch = touches[i];
+            Vector2 position = currentTouch.position.ReadValue();
 
-            if (currentTouch.press.wasPressedThisFrame &&
-                IsTouchOverUI(currentTouch.position.ReadValue()))
-            {
+            if (currentTouch.press.wasPressedThisFrame && IsTouchOverUI(position))
                 touchStartedOnUI = true;
-            }
 
             if (!currentTouch.press.isPressed)
                 continue;
 
             if (fingerCount == 0)
-                finger0 = currentTouch.position.ReadValue();
+                finger0 = position;
             else if (fingerCount == 1)
-                finger1 = currentTouch.position.ReadValue();
+                finger1 = position;
 
             fingerCount++;
         }
@@ -80,6 +102,7 @@ public class PlaceBuildingLab3 : MonoBehaviour
         {
             twoFingerGestureActive = false;
             isDragging = false;
+            touchStartedOnBuilding = false;
             return;
         }
 
@@ -103,26 +126,89 @@ public class PlaceBuildingLab3 : MonoBehaviour
             }
 
             if (placedBuilding == null)
+            {
                 PlaceBuildingOnPlane(screenPosition);
+            }
             else if (TouchIsOnBuilding(screenPosition))
+            {
                 isDragging = true;
+                touchStartedOnBuilding = true;
+                touchMoved = false;
+                touchStartPosition = screenPosition;
+                touchStartTime = Time.time;
+            }
         }
 
         if (touch.press.isPressed && isDragging)
-            DragBuilding(screenPosition);
+        {
+            if (Vector2.Distance(touchStartPosition, screenPosition) > 30f)
+                touchMoved = true;
+
+            if (touchMoved)
+                DragBuilding(screenPosition);
+        }
 
         if (touch.press.wasReleasedThisFrame)
+        {
+            if (touchStartedOnBuilding &&
+                !touchMoved &&
+                Time.time - touchStartTime < 0.35f)
+            {
+                RegisterTap();
+            }
+
             isDragging = false;
+            touchStartedOnBuilding = false;
+            touchMoved = false;
+
+            if (fingerCount == 0)
+                touchStartedOnUI = false;
+        }
+    }
+
+    private void RegisterTap()
+    {
+        if (Time.time - lastTapTime > 0.55f)
+            tapCount = 0;
+
+        tapCount++;
+        lastTapTime = Time.time;
+    }
+
+    private void ResolveTapSequence()
+    {
+        if (tapCount == 0 || Time.time - lastTapTime < 0.55f)
+            return;
+
+        if (tapCount == 2)
+            ToggleMaterial();
+        else if (tapCount >= 3)
+            animationActive = !animationActive;
+
+        tapCount = 0;
+    }
+
+    private void ToggleMaterial()
+    {
+        if (alternateMaterial == null || buildingRenderer == null || originalMaterial == null)
+        {
+            Debug.LogWarning("Assign the Alternate Material in the Inspector.");
+            return;
+        }
+
+        usingAlternateMaterial = !usingAlternateMaterial;
+        buildingRenderer.material =
+            usingAlternateMaterial ? alternateMaterial : originalMaterial;
     }
 
     private void BeginTwoFingerGesture(Vector2 finger0, Vector2 finger1)
     {
         twoFingerGestureActive = true;
         isDragging = false;
+        touchStartedOnBuilding = false;
 
         startPinchDistance = Vector2.Distance(finger0, finger1);
         startScale = placedBuilding.transform.localScale;
-
         previousFinger0 = finger0;
         previousFinger1 = finger1;
     }
@@ -141,13 +227,14 @@ public class PlaceBuildingLab3 : MonoBehaviour
         Vector2 delta0 = finger0 - previousFinger0;
         Vector2 delta1 = finger1 - previousFinger1;
 
-        if (delta0.sqrMagnitude > 1f && delta1.sqrMagnitude > 1f &&
+        if (delta0.sqrMagnitude > 1f &&
+            delta1.sqrMagnitude > 1f &&
             Vector2.Dot(delta0.normalized, delta1.normalized) > 0.7f)
         {
-            float averageHorizontalMovement = (delta0.x + delta1.x) * 0.5f;
+            float averageMovement = (delta0.x + delta1.x) * 0.5f;
             placedBuilding.transform.Rotate(
                 Vector3.up,
-                averageHorizontalMovement * 0.15f,
+                averageMovement * 0.15f,
                 Space.World);
         }
 
@@ -164,7 +251,13 @@ public class PlaceBuildingLab3 : MonoBehaviour
         }
 
         if (TryGetPlanePose(screenPosition, out Pose pose))
+        {
             placedBuilding = Instantiate(buildingPrefab, pose.position, pose.rotation);
+            buildingRenderer = placedBuilding.GetComponentInChildren<Renderer>();
+
+            if (buildingRenderer != null)
+                originalMaterial = buildingRenderer.material;
+        }
     }
 
     private void DragBuilding(Vector2 screenPosition)
@@ -199,8 +292,8 @@ public class PlaceBuildingLab3 : MonoBehaviour
         {
             Transform hitTransform = hit.collider.transform;
 
-            return hitTransform == placedBuilding.transform
-                || hitTransform.IsChildOf(placedBuilding.transform);
+            return hitTransform == placedBuilding.transform ||
+                   hitTransform.IsChildOf(placedBuilding.transform);
         }
 
         return false;
