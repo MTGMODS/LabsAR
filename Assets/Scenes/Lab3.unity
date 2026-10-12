@@ -1085,6 +1085,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlaceBuildingLab3
   buildingPrefab: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
+  alternateMaterial: {fileID: 2100000, guid: a5053993f02e54a4a95d84b6bc8676ee, type: 2}
+  rotationAnimationSpeed: 45
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
