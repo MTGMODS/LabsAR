@@ -7832,7 +7832,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6333da1e623c7144ba95cb7dd7c89f0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlaceBuilding
-  buildingPrefab: {fileID: 3712280069157342372, guid: d898cb0b1b02eac41b1d9e95688e1f8f, type: 3}
+  buildingPrefab: {fileID: 3712280069157342372, guid: 73f3cb1fcc7f2d14dbfd7b771e5bfd6c, type: 3}
 --- !u!114 &2059183801
 MonoBehaviour:
   m_ObjectHideFlags: 0
