@@ -11,9 +11,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Lab3.unity
     guid: f20ced0e7587e2d438b3c5a6d0f78302
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Lab4.unity
     guid: 5e87897527a1efd4ab30fd588cdbd469
+  - enabled: 1
+    path: Assets/Scenes/Lab5.unity
+    guid: b8e21047e6f3ade47b4b5a6f8955e8dd
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 6ee72d15cf39dd748a13eac57397b9af, type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 0465d33c6aee55f44b0237db8b0e0259, type: 2}
